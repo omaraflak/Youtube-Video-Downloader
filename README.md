@@ -26,4 +26,4 @@ zip youtube-downloader.zip -r youtube-dl-extension
 
 ### 3. Browse a Youtube video and enjoy the Download button.
 
-[!image](art/screenshot.png)
+![image](art/screenshot.png)
