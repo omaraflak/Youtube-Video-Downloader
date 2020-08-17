@@ -20,8 +20,8 @@ make run
 zip youtube-downloader.zip -r youtube-dl-extension
 ```
 
-1. Open Chrome at the following address: `chrome://extensions/`
-2. Toggle `Developer mode` on the top-right corner
+1. Open Chrome at the following address: `chrome://extensions`
+2. Toggle `Developer mode` in the top-right corner
 3. Click `Load unpacked` then select the zip file `youtube-downloader.zip`
 
 ### 3. Browse a Youtube video and enjoy the Download button.
