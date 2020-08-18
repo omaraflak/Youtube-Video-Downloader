@@ -1,0 +1,63 @@
+<html>
+    <header>
+        <link rel="stylesheet" type="text/css" href={{ url_for('static', filename='css/index.css') }}>
+        <title>Youtube Downloader</title>
+    </header>
+
+    <body>
+        <div class='container'>
+            <h1 class='title'>Download in progress</h1>
+            <div class='progress-container'>
+                <progress id='progress' value='0' max='100'></progress>
+                <div class='progress-string-container' id='progress-str'></div>
+            </div>
+            <div class='info-container' id='info'></div>
+            <div class='error-container' id='error'></div>
+        </div>
+
+        <script src='https://code.jquery.com/jquery-3.5.1.min.js' crossorigin='anonymous'></script>
+        <script type='text/javascript'>
+            const checkProgress = taskId => {
+                const progressBar = document.getElementById('progress')
+                const progressDiv = document.getElementById('progress-str')
+                const infoDiv = document.getElementById('info')
+                const errorDiv = document.getElementById('error')
+
+                function worker() {
+                    fetch('/progress/?task_id=' + taskId)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status == 'success') {
+                            const progress = 100 * (data.downloaded_bytes / data.total_bytes)
+                            progressBar.value = progress
+                            progressDiv.innerText = progress.toFixed(2) + '%'
+
+                            if (data.filesize_str && data.speed_str) {
+                                infoDiv.innerHTML = data.filesize_str + '</br>' + data.speed_str
+                            }
+
+                            if (data.finished) {
+                                window.location.href = '/file/?task_id=' + taskId
+                            } else {
+                                setTimeout(worker, 1000)
+                            }
+                        } else {
+                            errorDiv.innerHTML = data.message
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    })
+                }
+
+                worker()
+            }
+
+            window.onload = () => {
+                const urlParams = new URLSearchParams(window.location.search)
+                const taskId = urlParams.get('task_id')
+                checkProgress(taskId)
+            }
+        </script>
+    </body>
+</html>

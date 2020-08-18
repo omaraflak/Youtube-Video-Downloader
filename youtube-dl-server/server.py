@@ -2,13 +2,12 @@ import os
 import uuid
 import threading
 import youtube_dl
-from flask import Flask, request, send_file
-
-SERVER_PORT = 8080
-DOWNLOAD_FOLDER = 'videos'
+from flask import Flask, request, send_file, render_template
 
 app = Flask(__name__)
 
+SERVER_PORT = 8080
+DOWNLOAD_FOLDER = 'videos'
 download_threads = {}
 
 class DownloadThread(threading.Thread):
@@ -20,25 +19,12 @@ class DownloadThread(threading.Thread):
         super().__init__()
 
     def progress_hook(self, info):
-        # {
-        #     'status': 'downloading',
-        #     'downloaded_bytes': 1024,
-        #     'total_bytes': 228109154,
-        #     'tmpfilename': 'videos/3f2f86fc-7442-47e4-95ad-7e7f1993c338/OU55PWXm2rg.f137.mp4.part',
-        #     'filename': 'videos/3f2f86fc-7442-47e4-95ad-7e7f1993c338/OU55PWXm2rg.f137.mp4',
-        #     'eta': 4016,
-        #     'speed': 56863.63606995803,
-        #     'elapsed': 1.0482261180877686,
-        #     '_eta_str': '01:06:56',
-        #     '_percent_str': '  0.0%',
-        #     '_speed_str': '55.53KiB/s',
-        #     '_total_bytes_str': '217.54MiB'
-        # }
         self.info = {
             'finished': info['status'] == 'finished',
             'downloaded_bytes': info['downloaded_bytes'],
             'total_bytes': info['total_bytes'],
-            'percent_str': info['_percent_str']
+            'speed_str': info['_speed_str'],
+            'filesize_str': info['_total_bytes_str']
         }
         return self.info
 
@@ -73,27 +59,32 @@ def download_video():
 
 @app.route('/progress/')
 def get_progress():
-    thread_id = request.args.get('task_id')
-    if thread_id in download_threads:
-        thread = download_threads[thread_id]
+    task_id = request.args.get('task_id')
+    if task_id in download_threads:
+        thread = download_threads[task_id]
         return {'status': 'success', **thread.info}
     else:
         return {'status': 'error', 'message': 'Could not find file.'}
 
 @app.route('/file/')
 def get_file():
-    thread_id = request.args.get('task_id')
-    if thread_id in download_threads:
-        thread = download_threads[thread_id]
+    task_id = request.args.get('task_id')
+    if task_id in download_threads:
+        thread = download_threads[task_id]
         if thread.info['finished']:
-            files = os.listdir('%s/%s' % (DOWNLOAD_FOLDER, thread_id))
+            files = os.listdir('%s/%s' % (DOWNLOAD_FOLDER, task_id))
             filename = [name for name in files if name.startswith(thread.video_id)][0]
-            filepath = '%s/%s/%s' % (DOWNLOAD_FOLDER, thread_id, filename)
+            filepath = '%s/%s/%s' % (DOWNLOAD_FOLDER, task_id, filename)
             return send_file(filepath, as_attachment=True)
         else:
             return {'status': 'error', 'message': 'Download did not finish.'}
     else:
         return {'status': 'error', 'message': 'Could not find file.'}
+
+@app.route('/view/')
+def download_page():
+    task_id = request.args.get('task_id')
+    return render_template('index.html', task_id=task_id)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=SERVER_PORT)
