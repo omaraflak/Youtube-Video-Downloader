@@ -49,6 +49,7 @@ def hello_world():
     return '''
         Three routes are available:
         <ul>
+            <li><code>/info/?id=video_id</code> will fetch available formats</li>
             <li><code>/start/?id=video_id</code> will start the download and return a <code>task_id</code></li>
             <li><code>/progress/?id=task_id</code> will return the progress</li>
             <li><code>/file/?id=task_id</code> will download the file</li>
