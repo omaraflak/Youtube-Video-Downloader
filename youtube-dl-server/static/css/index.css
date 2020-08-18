@@ -1,0 +1,33 @@
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress-string-container {
+    margin-left: 15px;
+}
+
+.title {
+    align-items: center;
+}
+
+.info-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.error-container {
+    color: red;
+    margin-top: 15px;
+}
