@@ -4,8 +4,18 @@ const onDownloadClicked = () => {
     if(ampersandPosition != -1) {
         videoId = videoId.substring(0, ampersandPosition)
     }
-    const downloadLink = `http://localhost:8080/download/?id=${videoId}`
-    window.open(downloadLink, '_blank')
+
+    fetch(`http://localhost:8080/start/?id=${videoId}`)
+        .then(response => response.json())
+        .then(data => {
+            const taskId = data.task_id
+            if (taskId) {
+                window.open(`http://localhost:8080/view/?task_id=${taskId}`, '_blank')
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        })
 }
 
 const injectCode = (code) => {
