@@ -33,8 +33,12 @@ class DownloadThread(threading.Thread):
         #     '_speed_str': '55.53KiB/s',
         #     '_total_bytes_str': '217.54MiB'
         # }
-        info['finished'] = info['status'] == 'finished'
-        self.info = info
+        self.info = {
+            'finished': info['status'] == 'finished',
+            'downloaded_bytes': info['downloaded_bytes'],
+            'total_bytes': info['total_bytes'],
+            'percent_str': info['_percent_str']
+        }
         return self.info
 
     def run(self):
