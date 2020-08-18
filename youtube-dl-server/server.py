@@ -2,9 +2,10 @@ import os
 import uuid
 import threading
 import youtube_dl
-from flask import Flask, request, send_file, send_from_directory
+from flask import Flask, request, send_file
 
 SERVER_PORT = 8080
+DOWNLOAD_FOLDER = 'videos'
 
 app = Flask(__name__)
 
@@ -42,7 +43,7 @@ class DownloadThread(threading.Thread):
         return self.info
 
     def run(self):
-        folder = 'videos/%s' % self.uid
+        folder = '%s/%s' % (DOWNLOAD_FOLDER, self.uid)
         ydl_opts = {
             'outtmpl': folder + '/%(id)s.%(ext)s',
             'progress_hooks': [self.progress_hook],
@@ -77,7 +78,7 @@ def get_progress():
         thread = download_threads[thread_id]
         return {'status': 'success', **thread.info}
     else:
-        return {'status': 'error'}
+        return {'status': 'error', 'message': 'Could not find file.'}
 
 @app.route('/file/')
 def get_file():
@@ -85,9 +86,9 @@ def get_file():
     if thread_id in download_threads:
         thread = download_threads[thread_id]
         if thread.info['finished']:
-            files = os.listdir('videos/%s' % thread_id)
+            files = os.listdir('%s/%s' % (DOWNLOAD_FOLDER, thread_id))
             filename = [name for name in files if name.startswith(thread.video_id)][0]
-            filepath = 'videos/%s/%s' % (thread_id, filename)
+            filepath = '%s/%s/%s' % (DOWNLOAD_FOLDER, thread_id, filename)
             return send_file(filepath, as_attachment=True)
         else:
             return {'status': 'error', 'message': 'Download did not finish.'}
