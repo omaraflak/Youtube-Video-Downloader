@@ -5,17 +5,7 @@ const onDownloadClicked = () => {
         videoId = videoId.substring(0, ampersandPosition)
     }
 
-    fetch(`http://localhost:8080/start/?id=${videoId}`)
-        .then(response => response.json())
-        .then(data => {
-            const taskId = data.task_id
-            if (taskId) {
-                window.open(`http://localhost:8080/view/?task_id=${taskId}`, '_blank')
-            }
-        })
-        .catch(error => {
-            console.log(error)
-        })
+    chrome.runtime.sendMessage({url: `http://localhost:8080/start/?id=${videoId}`})
 }
 
 const injectCode = (code) => {
@@ -29,6 +19,13 @@ const injectCode = (code) => {
     }
     topRow.appendChild(code)
 }
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    const taskId = request.task_id
+    if (taskId) {
+        window.open(`http://localhost:8080/view/?task_id=${taskId}`, '_blank')
+    }
+})
 
 window.onload = () => {
     const downloadButton = document.createElement('button')
