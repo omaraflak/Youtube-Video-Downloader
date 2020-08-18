@@ -1,8 +1,12 @@
 .download-button {
-    background-color: #4CAF50;
+    background-color: #4caf50;
     border: none;
     color: white;
     text-align: center;
     font-size: 14px;
     border-radius: 3px;
+}
+
+.download-button:hover {
+    background-color: #087f23;
 }
