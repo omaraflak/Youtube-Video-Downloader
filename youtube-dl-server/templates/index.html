@@ -25,29 +25,29 @@
 
                 function worker() {
                     fetch('/progress/?task_id=' + taskId)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status == 'success') {
-                            const progress = 100 * (data.downloaded_bytes / data.total_bytes)
-                            progressBar.value = progress
-                            progressDiv.innerText = progress.toFixed(2) + '%'
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status == 'success') {
+                                const progress = 100 * (data.downloaded_bytes / data.total_bytes)
+                                progressBar.value = progress
+                                progressDiv.innerText = progress.toFixed(2) + '%'
 
-                            if (data.filesize_str && data.speed_str) {
-                                infoDiv.innerHTML = data.filesize_str + '</br>' + data.speed_str
-                            }
+                                if (data.filesize_str && data.speed_str) {
+                                    infoDiv.innerHTML = data.filesize_str + '</br>' + data.speed_str
+                                }
 
-                            if (data.finished) {
-                                window.location.href = '/file/?task_id=' + taskId
+                                if (data.finished) {
+                                    window.location.href = '/file/?task_id=' + taskId
+                                } else {
+                                    setTimeout(worker, 1000)
+                                }
                             } else {
-                                setTimeout(worker, 1000)
+                                errorDiv.innerHTML = data.message
                             }
-                        } else {
-                            errorDiv.innerHTML = data.message
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error)
-                    })
+                        })
+                        .catch(error => {
+                            console.log(error)
+                        })
                 }
 
                 worker()
