@@ -11,8 +11,9 @@ DOWNLOAD_FOLDER = 'videos'
 download_threads = {}
 
 class DownloadThread(threading.Thread):
-    def __init__(self, video_id):
+    def __init__(self, video_id, format_id):
         self.video_id = video_id
+        self.format_id = format_id
         self.link = get_video_link(video_id)
         self.info = self.get_info({})
         self.uid = str(uuid.uuid4())
@@ -36,6 +37,7 @@ class DownloadThread(threading.Thread):
         ydl_opts = {
             'outtmpl': folder + '/%(id)s.%(ext)s',
             'progress_hooks': [self.progress_hook],
+            'format': self.format_id,
             'quiet': True
         }
         ydl = youtube_dl.YoutubeDL(ydl_opts)
@@ -76,7 +78,8 @@ def get_info():
 @app.route('/start/')
 def download_video():
     video_id = request.args.get('id')
-    thread = DownloadThread(video_id)
+    format_id = request.args.get('format')
+    thread = DownloadThread(video_id, format_id)
     download_threads[thread.uid] = thread
     thread.start()
     return {'task_id': thread.uid}
