@@ -14,18 +14,21 @@ class DownloadThread(threading.Thread):
     def __init__(self, video_id):
         self.video_id = video_id
         self.link = 'https://www.youtube.com/watch?v=%s' % video_id
-        self.info = {}
+        self.info = self.get_info({})
         self.uid = str(uuid.uuid4())
         super().__init__()
 
-    def progress_hook(self, info):
-        self.info = {
-            'finished': info['status'] == 'finished',
+    def get_info(self, info):
+        return {
+            'finished': info.get('status', '') == 'finished',
             'downloaded_bytes': info.get('downloaded_bytes', 0),
             'total_bytes': info.get('total_bytes', 1),
             'speed_str': info.get('_speed_str', ''),
             'filesize_str': info.get('_total_bytes_str', '')
         }
+
+    def progress_hook(self, info):
+        self.info = self.get_info(info)
         return self.info
 
     def run(self):
