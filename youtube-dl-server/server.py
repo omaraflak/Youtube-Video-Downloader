@@ -2,7 +2,7 @@ import os
 import uuid
 import threading
 import youtube_dl
-from flask import Flask, request, send_file, render_template
+from flask import Flask, jsonify, request, send_file, render_template
 
 app = Flask(__name__)
 
@@ -13,7 +13,7 @@ download_threads = {}
 class DownloadThread(threading.Thread):
     def __init__(self, video_id):
         self.video_id = video_id
-        self.link = 'https://www.youtube.com/watch?v=%s' % video_id
+        self.link = get_video_link(video_id)
         self.info = self.get_info({})
         self.uid = str(uuid.uuid4())
         super().__init__()
@@ -41,6 +41,9 @@ class DownloadThread(threading.Thread):
         ydl = youtube_dl.YoutubeDL(ydl_opts)
         ydl.download([self.link])
 
+def get_video_link(video_id):
+    return 'https://www.youtube.com/watch?v=%s' % video_id
+
 @app.route('/')
 def hello_world():
     return '''
@@ -51,6 +54,23 @@ def hello_world():
             <li><code>/file/?id=task_id</code> will download the file</li>
         </ul>
     '''
+
+@app.route('/info/')
+def get_info():
+    video_id = request.args.get('id')
+    link = get_video_link(video_id)
+    ydl = youtube_dl.YoutubeDL({})
+    meta = ydl.extract_info(link, download=False)
+    formats = meta.get('formats', [meta])
+    output = [
+        {
+            'id': format['format_id'],
+            'ext': format['ext'],
+            'format': format['format']
+        }
+        for format in formats
+    ]
+    return jsonify(output)
 
 @app.route('/start/')
 def download_video():
