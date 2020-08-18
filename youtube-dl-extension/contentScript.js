@@ -1,3 +1,5 @@
+const SERVER = 'http://localhost:8080'
+
 const onDownloadClicked = () => {
     let videoId = window.location.search.split('v=')[1]
     let ampersandPosition = videoId.indexOf('&')
@@ -5,7 +7,7 @@ const onDownloadClicked = () => {
         videoId = videoId.substring(0, ampersandPosition)
     }
 
-    chrome.runtime.sendMessage({url: `http://localhost:8080/start/?id=${videoId}`})
+    chrome.runtime.sendMessage({url: `${SERVER}/start/?id=${videoId}`})
 }
 
 const injectCode = (code) => {
@@ -23,7 +25,7 @@ const injectCode = (code) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const taskId = request.task_id
     if (taskId) {
-        window.open(`http://localhost:8080/view/?task_id=${taskId}`, '_blank')
+        window.open(`${SERVER}/view/?task_id=${taskId}`, '_blank')
     }
 })
 
