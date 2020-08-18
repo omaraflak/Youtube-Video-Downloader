@@ -21,10 +21,10 @@ class DownloadThread(threading.Thread):
     def progress_hook(self, info):
         self.info = {
             'finished': info['status'] == 'finished',
-            'downloaded_bytes': info['downloaded_bytes'],
-            'total_bytes': info['total_bytes'],
-            'speed_str': info['_speed_str'],
-            'filesize_str': info['_total_bytes_str']
+            'downloaded_bytes': info.get('downloaded_bytes', 0),
+            'total_bytes': info.get('total_bytes', 1),
+            'speed_str': info.get('_speed_str', ''),
+            'filesize_str': info.get('_total_bytes_str', '')
         }
         return self.info
 
