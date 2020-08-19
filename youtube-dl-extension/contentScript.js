@@ -3,23 +3,36 @@ const SERVER = 'http://localhost:8080'
 let videoFormats = []
 
 const getVideoId = () => {
-    let videoId = window.location.search.split('v=')[1]
-    let ampersandPosition = videoId.indexOf('&')
-    if (ampersandPosition != -1) {
-        videoId = videoId.substring(0, ampersandPosition)
-    }
-    return videoId
+    return new Promise((resolve, reject) => {
+        const worker = () => {
+            const url = window.location.href
+            if (url.indexOf('v=') == -1) {
+                setTimeout(worker, 1000)
+            } else {
+                let videoId = url.split('v=')[1]
+                const ampersandPosition = videoId.indexOf('&')
+                if (ampersandPosition != -1) {
+                    videoId = videoId.substring(0, ampersandPosition)
+                }
+                resolve(videoId)
+            }
+        }
+
+        worker()
+    })
 }
 
 const fetchVideoFormats = () => {
-    const videoId = getVideoId()
-    chrome.runtime.sendMessage({uri: 'info', url: `${SERVER}/info/?id=${videoId}`})
+    getVideoId().then(videoId => {
+        chrome.runtime.sendMessage({uri: 'info', url: `${SERVER}/info/?id=${videoId}`})
+    })
 }
 
 const onFormatClicked = event => {
     const formatId = event.target.id
-    const videoId = getVideoId()
-    chrome.runtime.sendMessage({uri: 'start', url: `${SERVER}/start/?id=${videoId}&format=${formatId}`})
+    getVideoId().then(videoId => {
+        chrome.runtime.sendMessage({uri: 'start', url: `${SERVER}/start/?id=${videoId}&format=${formatId}`})
+    })
 }
 
 const showFormatSelectionPopup = () => {
