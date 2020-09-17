@@ -14,6 +14,14 @@ make
 make run
 ```
 
+### Run cron task at boot (optional)
+
+```
+crontab -e
+```
+
+Append at the end: `@reboot make run -f /path/to/Youtube-Video-Downloader/youtube-dl-server/Makefile`
+
 ### 2. Install the Chrome Extension
 
 1. Open Chrome at the following address: `chrome://extensions`
